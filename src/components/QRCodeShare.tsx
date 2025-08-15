@@ -19,8 +19,10 @@ export default function QRCodeShare() {
   const generateQRCode = async () => {
     try {
       setIsGenerating(true);
-      const currentUrl = window.location.href;
-      const qrCodeDataUrl = await QRCode.toDataURL(currentUrl, {
+      const profileId = typeof window !== 'undefined' ? localStorage.getItem('profileId') : '';
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+      const shareUrl = profileId ? `${baseUrl}/profile/${profileId}` : baseUrl;
+      const qrCodeDataUrl = await QRCode.toDataURL(shareUrl, {
         width: 300,
         margin: 2,
         color: {
@@ -42,12 +44,15 @@ export default function QRCodeShare() {
   };
 
   const handleShare = async () => {
+    const profileId = typeof window !== 'undefined' ? localStorage.getItem('profileId') : '';
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareUrl = profileId ? `${baseUrl}/profile/${profileId}` : baseUrl;
     if (navigator.share) {
       try {
         await navigator.share({
           title: "SpeedDial - My Links",
           text: "Check out my SpeedDial links!",
-          url: window.location.href,
+          url: shareUrl,
         });
       } catch (error) {
         console.error("Error sharing:", error);
@@ -55,7 +60,7 @@ export default function QRCodeShare() {
     } else {
       // Fallback: copy to clipboard
       try {
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(shareUrl);
         alert("URL copied to clipboard!");
       } catch (error) {
         console.error("Failed to copy URL:", error);
@@ -102,7 +107,9 @@ export default function QRCodeShare() {
                     Scan this QR code with your phone to access your SpeedDial
                   </p>
                   <p className="text-xs text-muted-foreground break-all">
-                    {window.location.href}
+                    {typeof window !== 'undefined' && localStorage.getItem('profileId')
+                      ? `${window.location.origin}/profile/${localStorage.getItem('profileId')}`
+                      : ''}
                   </p>
                 </div>
 

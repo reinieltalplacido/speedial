@@ -10,10 +10,13 @@ export class ApiError extends Error {
 }
 
 export const linksApi = {
-  // Fetch all links
-  async getLinks(): Promise<Link[]> {
+  // Fetch all links for a profileId
+  async getLinks(profileId?: string): Promise<Link[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/links`);
+      const url = profileId
+        ? `${API_BASE_URL}/api/links?profileId=${profileId}`
+        : `${API_BASE_URL}/api/links`;
+      const response = await fetch(url);
       if (!response.ok) {
         throw new ApiError(response.status, 'Failed to fetch links');
       }
@@ -24,8 +27,8 @@ export const linksApi = {
     }
   },
 
-  // Create a new link
-  async createLink(link: Omit<Link, 'id'>): Promise<Link> {
+  // Create a new link for a profileId
+  async createLink(link: Omit<Link, 'id'> & { profileId: string }): Promise<Link> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/links`, {
         method: 'POST',
@@ -47,8 +50,8 @@ export const linksApi = {
     }
   },
 
-  // Update an existing link
-  async updateLink(link: Link): Promise<Link> {
+  // Update an existing link for a profileId
+  async updateLink(link: Link & { profileId: string }): Promise<Link> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/links`, {
         method: 'PUT',
@@ -70,10 +73,10 @@ export const linksApi = {
     }
   },
 
-  // Delete a link
-  async deleteLink(id: string): Promise<void> {
+  // Delete a link for a profileId
+  async deleteLink(id: string, profileId: string): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/links?id=${id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/links?id=${id}&profileId=${profileId}`, {
         method: 'DELETE',
       });
       

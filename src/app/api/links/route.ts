@@ -32,10 +32,16 @@ async function writeLinks(links: any[]) {
   await fs.writeFile(dataFilePath, JSON.stringify(links, null, 2));
 }
 
-// GET - Retrieve all links
-export async function GET() {
+// GET - Retrieve all links for a profileId
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const profileId = searchParams.get('profileId');
     const links = await readLinks();
+    if (profileId) {
+      const filtered = links.filter((link: any) => link.profileId === profileId);
+      return NextResponse.json(filtered);
+    }
     return NextResponse.json(links);
   } catch (error) {
     return NextResponse.json(
@@ -45,15 +51,15 @@ export async function GET() {
   }
 }
 
-// POST - Create a new link
+// POST - Create a new link for a profileId
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, url, category } = body;
+    const { title, url, category, profileId } = body;
 
-    if (!title || !url) {
+    if (!title || !url || !profileId) {
       return NextResponse.json(
-        { error: 'Title and URL are required' },
+        { error: 'Title, URL, and profileId are required' },
         { status: 400 }
       );
     }
@@ -64,6 +70,7 @@ export async function POST(request: NextRequest) {
       title,
       url,
       category: category || 'General',
+      profileId,
       createdAt: new Date().toISOString(),
     };
 
@@ -79,21 +86,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT - Update a link
+// PUT - Update a link (must match profileId)
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, title, url, category } = body;
+    const { id, title, url, category, profileId } = body;
 
-    if (!id || !title || !url) {
+    if (!id || !title || !url || !profileId) {
       return NextResponse.json(
-        { error: 'ID, title, and URL are required' },
+        { error: 'ID, title, URL, and profileId are required' },
         { status: 400 }
       );
     }
 
     const links = await readLinks();
-    const linkIndex = links.findIndex((link: any) => link.id === id);
+    const linkIndex = links.findIndex((link: any) => link.id === id && link.profileId === profileId);
 
     if (linkIndex === -1) {
       return NextResponse.json(
@@ -120,21 +127,22 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Delete a link
+// DELETE - Delete a link (must match profileId)
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const profileId = searchParams.get('profileId');
 
-    if (!id) {
+    if (!id || !profileId) {
       return NextResponse.json(
-        { error: 'Link ID is required' },
+        { error: 'Link ID and profileId are required' },
         { status: 400 }
       );
     }
 
     const links = await readLinks();
-    const filteredLinks = links.filter((link: any) => link.id !== id);
+    const filteredLinks = links.filter((link: any) => !(link.id === id && link.profileId === profileId));
 
     if (filteredLinks.length === links.length) {
       return NextResponse.json(
