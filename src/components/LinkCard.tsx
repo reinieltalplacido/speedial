@@ -43,12 +43,12 @@ const LinkCard = ({
 
   return (
     <Card
-      className="bg-card border border-border rounded-lg transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden w-full max-w-[280px]"
+      className="bg-card border border-border rounded-lg transition-all duration-200 hover:shadow-md cursor-pointer overflow-hidden w-full max-w-[95vw] xs:max-w-[320px] sm:max-w-[280px]"
       onClick={handleClick}
     >
       <CardContent className="p-0">
         {/* Favicon and title section */}
-        <div className="bg-card p-4 flex items-center justify-center">
+        <div className="bg-card p-3 sm:p-4 flex items-center justify-center">
           <img
             src={getFaviconUrl(url)}
             alt=""
@@ -61,11 +61,11 @@ const LinkCard = ({
         </div>
 
         {/* Title, URL and Category section */}
-        <div className="bg-card p-3 border-t border-border">
-          <h3 className="font-medium text-sm text-foreground truncate mb-1">
+        <div className="bg-card p-2 sm:p-3 border-t border-border">
+          <h3 className="font-medium text-sm sm:text-base text-foreground truncate mb-1">
             {title}
           </h3>
-          <p className="text-xs text-muted-foreground truncate mb-1">
+          <p className="text-xs sm:text-sm text-muted-foreground truncate mb-1">
             {url.replace(/^https?:\/\//i, "")}
           </p>
           <span className="inline-block px-2 py-1 text-xs bg-muted text-muted-foreground rounded-full">
@@ -74,29 +74,29 @@ const LinkCard = ({
         </div>
 
         {/* Action buttons */}
-        <div className="card-actions flex justify-end gap-1 p-2 bg-card border-t border-border">
+        <div className="card-actions flex justify-end gap-2 sm:gap-1 p-2 bg-card border-t border-border">
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 hover:bg-muted"
+            className="h-9 w-9 sm:h-7 sm:w-7 p-0 hover:bg-muted"
             onClick={(e) => {
               e.stopPropagation();
               onEdit();
             }}
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-4 w-4 sm:h-3 sm:w-3" />
             <span className="sr-only">Edit</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0 text-destructive hover:text-destructive hover:bg-muted"
+            className="h-9 w-9 sm:h-7 sm:w-7 p-0 text-destructive hover:text-destructive hover:bg-muted"
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
             }}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-4 w-4 sm:h-3 sm:w-3" />
             <span className="sr-only">Delete</span>
           </Button>
         </div>

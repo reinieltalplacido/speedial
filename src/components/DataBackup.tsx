@@ -74,30 +74,29 @@ export default function DataBackup({ links, onImport }: DataBackupProps) {
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md w-full max-w-xs p-4 sm:p-6 rounded-lg">
           <DialogHeader>
-            <DialogTitle>Backup & Restore</DialogTitle>
+            <DialogTitle className="text-center text-base sm:text-lg">Backup & Restore</DialogTitle>
           </DialogHeader>
-          
           <div className="space-y-4">
             <div className="space-y-2">
-              <h3 className="font-medium">Export Links</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-medium text-center sm:text-left text-base">Export Links</h3>
+              <p className="text-sm text-muted-foreground text-center sm:text-left">
                 Download your links as a JSON file to backup or transfer to another device.
               </p>
               <Button
                 onClick={handleExport}
-                className="w-full flex items-center gap-2"
+                className="w-full flex items-center gap-2 py-3 text-base"
                 disabled={links.length === 0}
               >
-                <Download size={16} />
+                <Download size={18} />
                 Export {links.length} Links
               </Button>
             </div>
 
             <div className="space-y-2">
-              <h3 className="font-medium">Import Links</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="font-medium text-center sm:text-left text-base">Import Links</h3>
+              <p className="text-sm text-muted-foreground text-center sm:text-left">
                 Upload a previously exported JSON file to restore your links.
               </p>
               <div className="relative">
@@ -110,18 +109,18 @@ export default function DataBackup({ links, onImport }: DataBackupProps) {
                 />
                 <Button
                   variant="outline"
-                  className="w-full flex items-center gap-2"
+                  className="w-full flex items-center gap-2 py-3 text-base"
                   disabled={isImporting}
                 >
-                  <Upload size={16} />
+                  <Upload size={18} />
                   {isImporting ? "Importing..." : "Choose File"}
                 </Button>
               </div>
             </div>
 
             <div className="pt-4 border-t">
-              <p className="text-xs text-muted-foreground">
-                <strong>Tip:</strong> You can use this feature to transfer your links between devices 
+              <p className="text-xs text-muted-foreground text-center">
+                <strong>Tip:</strong> You can use this feature to transfer your links between devices
                 or create backups. The exported file contains all your link data in JSON format.
               </p>
             </div>

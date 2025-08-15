@@ -150,7 +150,7 @@ export default function SpeedDialAppSimple() {
   };
 
   return (
-    <main className="min-h-screen p-6 md:p-12 bg-background">
+    <main className="min-h-screen p-3 sm:p-6 md:p-12 bg-background">
       <div className="max-w-7xl mx-auto">
         {/* Message Display */}
         {error && (
@@ -164,47 +164,50 @@ export default function SpeedDialAppSimple() {
           </div>
         )}
 
-        <header className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Speed Dial</h1>
-          <div className="flex items-center gap-2">
-            <DataBackup links={links} onImport={handleImportLinks} />
-            <QRCodeShare />
+        <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center sm:text-left">Speed Dial</h1>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto">
+              <DataBackup links={links} onImport={handleImportLinks} />
+              <QRCodeShare />
+            </div>
             <Button
               onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto"
               disabled={isSaving}
             >
               <Plus size={16} />
-              Add Link
+              <span className="hidden xs:inline">Add Link</span>
+              <span className="inline xs:hidden">Add</span>
             </Button>
           </div>
         </header>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="bg-muted p-6 rounded-lg max-w-md">
+          <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center">
+            <div className="bg-muted p-4 sm:p-6 rounded-lg max-w-xs sm:max-w-md w-full">
               <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <h2 className="text-xl font-medium mb-2">Loading your links...</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-lg sm:text-xl font-medium mb-2">Loading your links...</h2>
+              <p className="text-muted-foreground text-sm">
                 Please wait while we fetch your speed dial links.
               </p>
             </div>
           </div>
         ) : links.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="bg-muted p-6 rounded-lg max-w-md">
-              <h2 className="text-xl font-medium mb-2">No links yet</h2>
-              <p className="text-muted-foreground mb-6">
-                Add your first link to get started with your personal speed dial
-                dashboard.
+          <div className="flex flex-col items-center justify-center py-16 sm:py-20 text-center">
+            <div className="bg-muted p-4 sm:p-6 rounded-lg max-w-xs sm:max-w-md w-full">
+              <h2 className="text-lg sm:text-xl font-medium mb-2">No links yet</h2>
+              <p className="text-muted-foreground mb-6 text-sm">
+                Add your first link to get started with your personal speed dial dashboard.
               </p>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2 flex-row-reverse justify-start"
+                className="flex items-center gap-2 flex-row-reverse justify-start w-full sm:w-auto"
                 disabled={isSaving}
               >
                 <Plus size={16} />
-                Add Your First Link
+                <span className="hidden xs:inline">Add Your First Link</span>
+                <span className="inline xs:hidden">Add Link</span>
               </Button>
             </div>
           </div>
