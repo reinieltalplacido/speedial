@@ -1,0 +1,255 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Plus, Loader2 } from "lucide-react";
+import LinkGrid from "@/components/LinkGrid";
+import LinkForm from "@/components/LinkForm";
+import QRCodeShare from "@/components/QRCodeShare";
+import DataBackup from "@/components/DataBackup";
+import { linksApi, ApiError } from "@/lib/api";
+import { Link } from "@/app/page";
+
+export default function SpeedDialAppSimple() {
+  const [links, setLinks] = useState<Link[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentLink, setCurrentLink] = useState<Link | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  // Load links from API on component mount
+  useEffect(() => {
+    loadLinks();
+  }, []);
+
+  const showMessage = (message: string, isError = false) => {
+    if (isError) {
+      setError(message);
+      setTimeout(() => setError(null), 5000);
+    } else {
+      setSuccess(message);
+      setTimeout(() => setSuccess(null), 3000);
+    }
+  };
+
+  const loadLinks = async () => {
+    try {
+      setIsLoading(true);
+      const fetchedLinks = await linksApi.getLinks();
+      setLinks(fetchedLinks);
+    } catch (error) {
+      console.error("Failed to load links:", error);
+      showMessage(
+        error instanceof ApiError 
+          ? error.message 
+          : "Failed to load links. Please try again.",
+        true
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAddLink = async (link: Omit<Link, "id">) => {
+    try {
+      setIsSaving(true);
+      const newLink = await linksApi.createLink(link);
+      setLinks([...links, newLink]);
+      setIsAddModalOpen(false);
+      showMessage("Link added successfully!");
+    } catch (error) {
+      console.error("Failed to add link:", error);
+      showMessage(
+        error instanceof ApiError 
+          ? error.message 
+          : "Failed to add link. Please try again.",
+        true
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleEditLink = async (updatedLink: Link) => {
+    try {
+      setIsSaving(true);
+      const editedLink = await linksApi.updateLink(updatedLink);
+      setLinks(
+        links.map((link) => (link.id === editedLink.id ? editedLink : link)),
+      );
+      setIsEditModalOpen(false);
+      setCurrentLink(null);
+      showMessage("Link updated successfully!");
+    } catch (error) {
+      console.error("Failed to update link:", error);
+      showMessage(
+        error instanceof ApiError 
+          ? error.message 
+          : "Failed to update link. Please try again.",
+        true
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteLink = async (id: string) => {
+    try {
+      await linksApi.deleteLink(id);
+      setLinks(links.filter((link) => link.id !== id));
+      showMessage("Link deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete link:", error);
+      showMessage(
+        error instanceof ApiError 
+          ? error.message 
+          : "Failed to delete link. Please try again.",
+        true
+      );
+    }
+  };
+
+  const handleImportLinks = async (importedLinks: Link[]) => {
+    try {
+      setIsSaving(true);
+      // Clear existing links first
+      for (const link of links) {
+        await linksApi.deleteLink(link.id);
+      }
+      
+      // Add imported links
+      const newLinks: Link[] = [];
+      for (const link of importedLinks) {
+        const { id, ...linkData } = link;
+        const newLink = await linksApi.createLink(linkData);
+        newLinks.push(newLink);
+      }
+      
+      setLinks(newLinks);
+      showMessage(`Successfully imported ${importedLinks.length} links!`);
+    } catch (error) {
+      console.error("Failed to import links:", error);
+      showMessage("Failed to import links. Please try again.", true);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openEditModal = (link: Link) => {
+    setCurrentLink(link);
+    setIsEditModalOpen(true);
+  };
+
+  return (
+    <main className="min-h-screen p-6 md:p-12 bg-background">
+      <div className="max-w-7xl mx-auto">
+        {/* Message Display */}
+        {error && (
+          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+            <p className="text-destructive text-sm">{error}</p>
+          </div>
+        )}
+        {success && (
+          <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <p className="text-green-600 text-sm">{success}</p>
+          </div>
+        )}
+
+        <header className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Speed Dial</h1>
+          <div className="flex items-center gap-2">
+            <DataBackup links={links} onImport={handleImportLinks} />
+            <QRCodeShare />
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2"
+              disabled={isSaving}
+            >
+              <Plus size={16} />
+              Add Link
+            </Button>
+          </div>
+        </header>
+
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-muted p-6 rounded-lg max-w-md">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <h2 className="text-xl font-medium mb-2">Loading your links...</h2>
+              <p className="text-muted-foreground">
+                Please wait while we fetch your speed dial links.
+              </p>
+            </div>
+          </div>
+        ) : links.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="bg-muted p-6 rounded-lg max-w-md">
+              <h2 className="text-xl font-medium mb-2">No links yet</h2>
+              <p className="text-muted-foreground mb-6">
+                Add your first link to get started with your personal speed dial
+                dashboard.
+              </p>
+              <Button
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center gap-2 flex-row-reverse justify-start"
+                disabled={isSaving}
+              >
+                <Plus size={16} />
+                Add Your First Link
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <LinkGrid
+            links={links}
+            onEdit={openEditModal}
+            onDelete={handleDeleteLink}
+          />
+        )}
+
+        {/* Add Link Modal */}
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Link</DialogTitle>
+            </DialogHeader>
+            <LinkForm
+              onSubmit={handleAddLink}
+              onCancel={() => setIsAddModalOpen(false)}
+              isLoading={isSaving}
+            />
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Link Modal */}
+        <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Link</DialogTitle>
+            </DialogHeader>
+            <LinkForm
+              initialValues={currentLink || undefined}
+              onSubmit={(data) => {
+                if ("id" in data) {
+                  handleEditLink(data);
+                }
+              }}
+              onCancel={() => setIsEditModalOpen(false)}
+              isEditing={true}
+              isLoading={isSaving}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+    </main>
+  );
+}

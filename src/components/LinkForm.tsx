@@ -17,6 +17,7 @@ interface LinkFormProps {
   onCancel?: () => void;
   initialValues?: Link;
   isEditing?: boolean;
+  isLoading?: boolean;
 }
 
 export default function LinkForm({
@@ -24,6 +25,7 @@ export default function LinkForm({
   onCancel = () => {},
   initialValues,
   isEditing = false,
+  isLoading = false,
 }: LinkFormProps) {
   const [formData, setFormData] = useState({
     title: initialValues?.title || "",
@@ -122,10 +124,12 @@ export default function LinkForm({
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           Cancel
         </Button>
-        <Button type="submit">{isEditing ? "Save Changes" : "Add Link"}</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? "Saving..." : isEditing ? "Save Changes" : "Add Link"}
+        </Button>
       </div>
     </form>
   );

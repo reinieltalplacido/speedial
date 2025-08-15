@@ -7,6 +7,14 @@ const nextConfig = {
 	images: {
 		domains: ['images.unsplash.com'],
 	},
+	async rewrites() {
+		return [
+			{
+				source: '/favicon.ico',
+				destination: '/favicon-32x32.ico',
+			},
+		];
+	},
 };
 
 if (process.env.NEXT_PUBLIC_TEMPO) {

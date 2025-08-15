@@ -1,0 +1,19 @@
+{
+  "name": "SpeedDial - Personal Link Dashboard",
+  "short_name": "SpeedDial",
+  "description": "A personal speed dial dashboard for your favorite links",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon-32x32.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "en",
+  "orientation": "portrait-primary"
+}
