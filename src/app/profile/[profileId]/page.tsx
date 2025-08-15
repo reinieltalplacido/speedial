@@ -1,7 +1,5 @@
-// src/app/profile/[profileId]/page.tsx
-
 import LinkGrid from '@/components/LinkGrid';
-import { Link } from '@/lib/types'; // ✅ Use the proper types file
+import { Link } from '@/lib/types';
 
 async function fetchLinks(profileId: string): Promise<Link[]> {
   const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
@@ -9,18 +7,14 @@ async function fetchLinks(profileId: string): Promise<Link[]> {
     cache: 'no-store',
   });
 
-  if (!res.ok) {
-    return [];
-  }
-
+  if (!res.ok) return [];
   return res.json();
 }
 
-export default async function ProfilePage({
-  params,
-}: {
-  params: { profileId: string };
-}) {
+export default async function ProfilePage(
+  props: { params: { profileId: string } } // ✅ Explicit type, no PageProps
+) {
+  const { params } = props;
   const links = await fetchLinks(params.profileId);
 
   return (
