@@ -1,10 +1,6 @@
 import LinkGrid from '@/components/LinkGrid';
 import { Link } from '@/app/page';
 
-interface ProfilePageProps {
-  params: { profileId: string };
-}
-
 async function fetchLinks(profileId: string): Promise<Link[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/links?profileId=${profileId}`, {
     cache: 'no-store',
@@ -13,7 +9,7 @@ async function fetchLinks(profileId: string): Promise<Link[]> {
   return res.json();
 }
 
-export default async function ProfilePage({ params }: ProfilePageProps) {
+export default async function ProfilePage({ params }: { params: { profileId: string } }) {
   const links = await fetchLinks(params.profileId);
   return (
     <main className="min-h-screen p-3 sm:p-6 md:p-12 bg-background">
