@@ -1,24 +1,26 @@
+// src/app/profile/[profileId]/page.tsx
+
 import LinkGrid from '@/components/LinkGrid';
-import { Link as LinkItem } from '@/app/page'; // renamed to LinkItem to avoid conflicts
+import { Link } from '@/lib/types'; // ✅ Use the proper types file
 
-interface ProfilePageProps {
-  params: {
-    profileId: string;
-  };
-}
+async function fetchLinks(profileId: string): Promise<Link[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
+  const res = await fetch(`${baseUrl}/api/links?profileId=${profileId}`, {
+    cache: 'no-store',
+  });
 
-async function fetchLinks(profileId: string): Promise<LinkItem[]> {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL || ''}/api/links?profileId=${profileId}`,
-    {
-      cache: 'no-store',
-    }
-  );
-  if (!res.ok) return [];
+  if (!res.ok) {
+    return [];
+  }
+
   return res.json();
 }
 
-export default async function ProfilePage({ params }: ProfilePageProps) {
+export default async function ProfilePage({
+  params,
+}: {
+  params: { profileId: string };
+}) {
   const links = await fetchLinks(params.profileId);
 
   return (
@@ -27,11 +29,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-8">
           Shared Links
         </h1>
-
         {links.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <div className="bg-muted p-4 sm:p-6 rounded-lg max-w-xs sm:max-w-md w-full">
-              <h2 className="text-lg sm:text-xl font-medium mb-2">No links found</h2>
+              <h2 className="text-lg sm:text-xl font-medium mb-2">
+                No links found
+              </h2>
               <p className="text-muted-foreground mb-6 text-sm">
                 This profile has no shared links yet.
               </p>
