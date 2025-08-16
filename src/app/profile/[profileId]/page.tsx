@@ -11,10 +11,13 @@ async function fetchLinks(profileId: string): Promise<Link[]> {
   return res.json();
 }
 
-export default async function ProfilePage(
-  props: { params: { profileId: string } } // ✅ Explicit type, no PageProps
-) {
-  const { params } = props;
+interface ProfilePageProps {
+  params: {
+    profileId: string;
+  };
+}
+
+export default async function ProfilePage({ params }: ProfilePageProps) {
   const links = await fetchLinks(params.profileId);
 
   return (
