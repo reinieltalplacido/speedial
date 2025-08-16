@@ -1,8 +1,6 @@
-// src/types.ts
 export interface Link {
-    id: string;
-    url: string;
-    title: string;
-    profileId: string;
-  }
-  
+  id: string;
+  title: string;
+  url: string;
+  category?: string; // <-- make category optional
+}
