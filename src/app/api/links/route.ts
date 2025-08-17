@@ -4,32 +4,89 @@ import path from 'path';
 
 const dataFilePath = path.join(process.cwd(), 'data', 'links.json');
 
+// In-memory storage fallback for Vercel
+let inMemoryLinks: any[] = [
+  {
+    "id": "1755265449713",
+    "title": "Instagram",
+    "url": "https://www.instagram.com",
+    "category": "INSTA",
+    "username": "demo",
+    "createdAt": "2025-08-15T13:44:09.713Z"
+  },
+  {
+    "id": "1755325622564",
+    "title": "Facebook",
+    "url": "https://www.facebook.com",
+    "category": "General",
+    "username": "oreo",
+    "createdAt": "2025-08-16T06:27:02.564Z"
+  },
+  {
+    "id": "1755326335371",
+    "title": "Tempo",
+    "url": "https://www.tempo.new",
+    "category": "General",
+    "username": "oreo",
+    "createdAt": "2025-08-16T06:38:55.371Z"
+  }
+];
+let useInMemory = false;
+
 // Ensure data directory exists
 async function ensureDataDirectory() {
   const dataDir = path.dirname(dataFilePath);
   try {
     await fs.access(dataDir);
   } catch {
-    await fs.mkdir(dataDir, { recursive: true });
+    try {
+      await fs.mkdir(dataDir, { recursive: true });
+    } catch (mkdirError) {
+      console.warn('Failed to create data directory, using in-memory storage:', mkdirError);
+      useInMemory = true;
+    }
   }
 }
 
-// Read links from file
+// Read links from file or memory
 async function readLinks() {
+  if (useInMemory) {
+    return inMemoryLinks;
+  }
+  
   try {
     await ensureDataDirectory();
     const data = await fs.readFile(dataFilePath, 'utf-8');
-    return JSON.parse(data);
+    const links = JSON.parse(data);
+    // Keep in-memory copy in sync
+    inMemoryLinks = links;
+    return links;
   } catch (error) {
-    // If file doesn't exist, return empty array
-    return [];
+    console.warn('Failed to read from file, using in-memory storage:', error);
+    useInMemory = true;
+    return inMemoryLinks;
   }
 }
 
-// Write links to file
+// Write links to file or memory
 async function writeLinks(links: any[]) {
-  await ensureDataDirectory();
-  await fs.writeFile(dataFilePath, JSON.stringify(links, null, 2));
+  // Always update in-memory storage
+  inMemoryLinks = links;
+  
+  if (useInMemory) {
+    console.log('Using in-memory storage, links updated successfully');
+    return;
+  }
+  
+  try {
+    await ensureDataDirectory();
+    await fs.writeFile(dataFilePath, JSON.stringify(links, null, 2));
+    console.log('Links written successfully to:', dataFilePath);
+  } catch (error) {
+    console.error('Error writing links to file, switching to in-memory storage:', error);
+    useInMemory = true;
+    // Links are already in memory, so this is fine
+  }
 }
 
 // GET - Retrieve all links for a username
@@ -64,6 +121,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log('Creating link:', { title, url, category, username });
+
     const links = await readLinks();
     const newLink = {
       id: Date.now().toString(),
@@ -75,12 +134,23 @@ export async function POST(request: NextRequest) {
     };
 
     links.push(newLink);
-    await writeLinks(links);
+    
+    try {
+      await writeLinks(links);
+      console.log('Link created successfully:', newLink.id);
+    } catch (writeError) {
+      console.error('Failed to write links:', writeError);
+      return NextResponse.json(
+        { error: 'Failed to save link to storage' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(newLink, { status: 201 });
   } catch (error) {
+    console.error('Error in POST /api/links:', error);
     return NextResponse.json(
-      { error: 'Failed to create link' },
+      { error: 'Failed to create link', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
