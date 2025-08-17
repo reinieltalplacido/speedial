@@ -67,10 +67,13 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
     }
   };
 
-  const handleAddLink = async (link: Omit<Link, "id">) => {
+  const handleAddLink = async (linkData: { title: string; url: string; category: string; username: string }) => {
     try {
       setIsSaving(true);
-      const newLink = await linksApi.createLink({ ...link, username });
+      const newLink = await linksApi.createLink({
+        ...linkData,
+        createdAt: new Date().toISOString(),
+      });
       setLinks([...links, newLink]);
       setIsAddModalOpen(false);
       showMessage("Link added successfully!");
@@ -87,10 +90,14 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
     }
   };
 
-  const handleEditLink = async (updatedLink: Link) => {
+  const handleEditLink = async (updatedLink: { id: string; title: string; url: string; category: string; username: string }) => {
     try {
       setIsSaving(true);
-      const editedLink = await linksApi.updateLink({ ...updatedLink, username });
+      const editedLink = await linksApi.updateLink({ 
+        ...updatedLink, 
+        username,
+        createdAt: currentLink?.createdAt || new Date().toISOString(),
+      });
       setLinks(
         links.map((link) => (link.id === editedLink.id ? editedLink : link)),
       );
