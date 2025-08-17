@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, X, CheckCircle, AlertCircle } from "lucide-react";
 import LinkGrid from "@/components/LinkGrid";
 import LinkForm from "@/components/LinkForm";
 import { linksApi, ApiError } from "@/lib/api";
@@ -18,6 +18,13 @@ interface SpeedDialAppSimpleProps {
   username: string;
 }
 
+interface ToastMessage {
+  id: string;
+  message: string;
+  type: 'success' | 'error';
+  visible: boolean;
+}
+
 export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps) {
   const [links, setLinks] = useState<Link[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -25,8 +32,7 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
   const [currentLink, setCurrentLink] = useState<Link | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // Load links from API on component mount
   useEffect(() => {
@@ -36,13 +42,37 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
   }, [username]);
 
   const showMessage = (message: string, isError = false) => {
-    if (isError) {
-      setError(message);
-      setTimeout(() => setError(null), 5000);
-    } else {
-      setSuccess(message);
-      setTimeout(() => setSuccess(null), 3000);
-    }
+    const id = Date.now().toString();
+    const newToast: ToastMessage = {
+      id,
+      message,
+      type: isError ? 'error' : 'success',
+      visible: true,
+    };
+    
+    setToasts(prev => [...prev, newToast]);
+    
+    // Auto-hide toast after 3 seconds
+    setTimeout(() => {
+      setToasts(prev => prev.map(toast => 
+        toast.id === id ? { ...toast, visible: false } : toast
+      ));
+      
+      // Remove toast from state after animation
+      setTimeout(() => {
+        setToasts(prev => prev.filter(toast => toast.id !== id));
+      }, 300);
+    }, 3000);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.map(toast => 
+      toast.id === id ? { ...toast, visible: false } : toast
+    ));
+    
+    setTimeout(() => {
+      setToasts(prev => prev.filter(toast => toast.id !== id));
+    }, 300);
   };
 
   const loadLinks = async (uname: string) => {
@@ -136,20 +166,39 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
 
   return (
     <>
+      {/* Toast Container */}
+      <div className="fixed bottom-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <div
+            key={toast.id}
+            className={`flex items-center gap-3 p-4 rounded-lg shadow-lg border transition-all duration-300 ${
+              toast.visible 
+                ? 'translate-x-0 opacity-100' 
+                : 'translate-x-full opacity-0'
+            } ${
+              toast.type === 'success'
+                ? 'bg-green-500 text-white border-green-600'
+                : 'bg-red-500 text-white border-red-600'
+            }`}
+          >
+            {toast.type === 'success' ? (
+              <CheckCircle className="h-5 w-5" />
+            ) : (
+              <AlertCircle className="h-5 w-5" />
+            )}
+            <span className="text-sm font-medium">{toast.message}</span>
+            <button
+              onClick={() => removeToast(toast.id)}
+              className="ml-auto text-white/80 hover:text-white transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+      </div>
+
       <main className="min-h-screen p-3 sm:p-6 md:p-12 bg-background">
         <div className="max-w-7xl mx-auto">
-          {/* Message Display */}
-          {error && (
-            <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
-              <p className="text-destructive text-sm">{error}</p>
-            </div>
-          )}
-          {success && (
-            <div className="mb-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-              <p className="text-green-600 text-sm">{success}</p>
-            </div>
-          )}
-
           <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
             <div className="text-center sm:text-left">
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Speed Dial</h1>
