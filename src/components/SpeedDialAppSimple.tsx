@@ -11,12 +11,8 @@ import {
 import { Plus, Loader2 } from "lucide-react";
 import LinkGrid from "@/components/LinkGrid";
 import LinkForm from "@/components/LinkForm";
-import QRCodeShare from "@/components/QRCodeShare";
-import DataBackup from "@/components/DataBackup";
 import { linksApi, ApiError } from "@/lib/api";
 import { Link } from "@/lib/types";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 interface SpeedDialAppSimpleProps {
   username: string;
@@ -133,32 +129,6 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
     }
   };
 
-  const handleImportLinks = async (importedLinks: Link[]) => {
-    try {
-      setIsSaving(true);
-      // Clear existing links first
-      for (const link of links) {
-        await linksApi.deleteLink(link.id, username);
-      }
-      
-      // Add imported links
-      const newLinks: Link[] = [];
-      for (const link of importedLinks) {
-        const { id, ...linkData } = link;
-        const newLink = await linksApi.createLink({ ...linkData, username });
-        newLinks.push(newLink);
-      }
-      
-      setLinks(newLinks);
-      showMessage(`Successfully imported ${importedLinks.length} links!`);
-    } catch (error) {
-      console.error("Failed to import links:", error);
-      showMessage("Failed to import links. Please try again.", true);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const openEditModal = (link: Link) => {
     setCurrentLink(link);
     setIsEditModalOpen(true);
@@ -187,18 +157,16 @@ export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
               <div className="flex gap-2 w-full sm:w-auto">
-                <DataBackup links={links} onImport={handleImportLinks} />
-                <QRCodeShare username={username} />
+                <Button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex items-center gap-2 w-full sm:w-auto"
+                  disabled={isSaving}
+                >
+                  <Plus size={16} />
+                  <span className="hidden xs:inline">Add Link</span>
+                  <span className="inline xs:hidden">Add</span>
+                </Button>
               </div>
-              <Button
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2 w-full sm:w-auto"
-                disabled={isSaving}
-              >
-                <Plus size={16} />
-                <span className="hidden xs:inline">Add Link</span>
-                <span className="inline xs:hidden">Add</span>
-              </Button>
             </div>
           </header>
 
