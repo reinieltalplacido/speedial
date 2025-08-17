@@ -14,21 +14,15 @@ import LinkForm from "@/components/LinkForm";
 import QRCodeShare from "@/components/QRCodeShare";
 import DataBackup from "@/components/DataBackup";
 import { linksApi, ApiError } from "@/lib/api";
-import { Link } from "@/app/page";
+import { Link } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-function getStoredProfileId() {
-  if (typeof window === 'undefined') return '';
-  return localStorage.getItem('profileId') || '';
+interface SpeedDialAppSimpleProps {
+  username: string;
 }
 
-function setStoredProfileId(id: string) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('profileId', id);
-}
-
-export default function SpeedDialAppSimple() {
+export default function SpeedDialAppSimple({ username }: SpeedDialAppSimpleProps) {
   const [links, setLinks] = useState<Link[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -37,19 +31,13 @@ export default function SpeedDialAppSimple() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [profileId, setProfileId] = useState<string>(typeof window !== 'undefined' ? getStoredProfileId() : '');
-  const [showProfileDialog, setShowProfileDialog] = useState(false);
 
   // Load links from API on component mount
   useEffect(() => {
-    if (!profileId) {
-      setShowProfileDialog(true);
-    } else {
-      setStoredProfileId(profileId);
-      loadLinks(profileId);
+    if (username) {
+      loadLinks(username);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileId]);
+  }, [username]);
 
   const showMessage = (message: string, isError = false) => {
     if (isError) {
@@ -61,10 +49,10 @@ export default function SpeedDialAppSimple() {
     }
   };
 
-  const loadLinks = async (pid: string) => {
+  const loadLinks = async (uname: string) => {
     try {
       setIsLoading(true);
-      const fetchedLinks = await linksApi.getLinks(pid);
+      const fetchedLinks = await linksApi.getLinks(uname);
       setLinks(fetchedLinks);
     } catch (error) {
       console.error("Failed to load links:", error);
@@ -79,19 +67,10 @@ export default function SpeedDialAppSimple() {
     }
   };
 
-  const handleProfileIdSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (profileId.trim()) {
-      setStoredProfileId(profileId.trim());
-      setShowProfileDialog(false);
-      loadLinks(profileId.trim());
-    }
-  };
-
   const handleAddLink = async (link: Omit<Link, "id">) => {
     try {
       setIsSaving(true);
-      const newLink = await linksApi.createLink({ ...link, profileId });
+      const newLink = await linksApi.createLink({ ...link, username });
       setLinks([...links, newLink]);
       setIsAddModalOpen(false);
       showMessage("Link added successfully!");
@@ -111,7 +90,7 @@ export default function SpeedDialAppSimple() {
   const handleEditLink = async (updatedLink: Link) => {
     try {
       setIsSaving(true);
-      const editedLink = await linksApi.updateLink({ ...updatedLink, profileId });
+      const editedLink = await linksApi.updateLink({ ...updatedLink, username });
       setLinks(
         links.map((link) => (link.id === editedLink.id ? editedLink : link)),
       );
@@ -133,7 +112,7 @@ export default function SpeedDialAppSimple() {
 
   const handleDeleteLink = async (id: string) => {
     try {
-      await linksApi.deleteLink(id, profileId);
+      await linksApi.deleteLink(id, username);
       setLinks(links.filter((link) => link.id !== id));
       showMessage("Link deleted successfully!");
     } catch (error) {
@@ -152,14 +131,14 @@ export default function SpeedDialAppSimple() {
       setIsSaving(true);
       // Clear existing links first
       for (const link of links) {
-        await linksApi.deleteLink(link.id, profileId);
+        await linksApi.deleteLink(link.id, username);
       }
       
       // Add imported links
       const newLinks: Link[] = [];
       for (const link of importedLinks) {
         const { id, ...linkData } = link;
-        const newLink = await linksApi.createLink({ ...linkData, profileId });
+        const newLink = await linksApi.createLink({ ...linkData, username });
         newLinks.push(newLink);
       }
       
@@ -180,31 +159,6 @@ export default function SpeedDialAppSimple() {
 
   return (
     <>
-      {/* Profile ID Dialog */}
-      <Dialog open={showProfileDialog} onOpenChange={setShowProfileDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Choose Your Public Profile ID</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleProfileIdSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="profileId">Profile ID (username)</Label>
-              <Input
-                id="profileId"
-                value={profileId}
-                onChange={e => setProfileId(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
-                placeholder="e.g. johndoe123"
-                autoFocus
-                minLength={3}
-                maxLength={32}
-                required
-              />
-              <p className="text-xs text-muted-foreground">Pick a unique username. You can share your links at <span className="font-mono">/profile/&lt;your id&gt;</span>.</p>
-            </div>
-            <Button type="submit" className="w-full">Save</Button>
-          </form>
-        </DialogContent>
-      </Dialog>
       <main className="min-h-screen p-3 sm:p-6 md:p-12 bg-background">
         <div className="max-w-7xl mx-auto">
           {/* Message Display */}
@@ -220,11 +174,14 @@ export default function SpeedDialAppSimple() {
           )}
 
           <header className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground text-center sm:text-left">Speed Dial</h1>
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Speed Dial</h1>
+              <p className="text-muted-foreground">@{username}</p>
+            </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 w-full sm:w-auto">
               <div className="flex gap-2 w-full sm:w-auto">
                 <DataBackup links={links} onImport={handleImportLinks} />
-                <QRCodeShare />
+                <QRCodeShare username={username} />
               </div>
               <Button
                 onClick={() => setIsAddModalOpen(true)}
@@ -284,6 +241,7 @@ export default function SpeedDialAppSimple() {
                 onSubmit={handleAddLink}
                 onCancel={() => setIsAddModalOpen(false)}
                 isLoading={isSaving}
+                username={username}
               />
             </DialogContent>
           </Dialog>
@@ -304,6 +262,7 @@ export default function SpeedDialAppSimple() {
                 onCancel={() => setIsEditModalOpen(false)}
                 isEditing={true}
                 isLoading={isSaving}
+                username={username}
               />
             </DialogContent>
           </Dialog>

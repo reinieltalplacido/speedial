@@ -32,14 +32,14 @@ async function writeLinks(links: any[]) {
   await fs.writeFile(dataFilePath, JSON.stringify(links, null, 2));
 }
 
-// GET - Retrieve all links for a profileId
+// GET - Retrieve all links for a username
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const profileId = searchParams.get('profileId');
+    const username = searchParams.get('username');
     const links = await readLinks();
-    if (profileId) {
-      const filtered = links.filter((link: any) => link.profileId === profileId);
+    if (username) {
+      const filtered = links.filter((link: any) => link.username === username);
       return NextResponse.json(filtered);
     }
     return NextResponse.json(links);
@@ -51,15 +51,15 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Create a new link for a profileId
+// POST - Create a new link for a username
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, url, category, profileId } = body;
+    const { title, url, category, username } = body;
 
-    if (!title || !url || !profileId) {
+    if (!title || !url || !username) {
       return NextResponse.json(
-        { error: 'Title, URL, and profileId are required' },
+        { error: 'Title, URL, and username are required' },
         { status: 400 }
       );
     }
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       title,
       url,
       category: category || 'General',
-      profileId,
+      username,
       createdAt: new Date().toISOString(),
     };
 
@@ -86,21 +86,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT - Update a link (must match profileId)
+// PUT - Update a link (must match username)
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, title, url, category, profileId } = body;
+    const { id, title, url, category, username } = body;
 
-    if (!id || !title || !url || !profileId) {
+    if (!id || !title || !url || !username) {
       return NextResponse.json(
-        { error: 'ID, title, URL, and profileId are required' },
+        { error: 'ID, title, URL, and username are required' },
         { status: 400 }
       );
     }
 
     const links = await readLinks();
-    const linkIndex = links.findIndex((link: any) => link.id === id && link.profileId === profileId);
+    const linkIndex = links.findIndex((link: any) => link.id === id && link.username === username);
 
     if (linkIndex === -1) {
       return NextResponse.json(
@@ -127,22 +127,22 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE - Delete a link (must match profileId)
+// DELETE - Delete a link (must match username)
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    const profileId = searchParams.get('profileId');
+    const username = searchParams.get('username');
 
-    if (!id || !profileId) {
+    if (!id || !username) {
       return NextResponse.json(
-        { error: 'Link ID and profileId are required' },
+        { error: 'Link ID and username are required' },
         { status: 400 }
       );
     }
 
     const links = await readLinks();
-    const filteredLinks = links.filter((link: any) => !(link.id === id && link.profileId === profileId));
+    const filteredLinks = links.filter((link: any) => !(link.id === id && link.username === username));
 
     if (filteredLinks.length === links.length) {
       return NextResponse.json(

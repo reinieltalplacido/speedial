@@ -3,4 +3,7 @@ export interface Link {
   url: string;
   title: string;
   category: string;   // ✅ always required
+  username: string;   // Username who owns this link
+  createdAt: string;
+  updatedAt?: string;
 }

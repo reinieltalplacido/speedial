@@ -11,7 +11,11 @@ import {
 import { QrCode, Share2 } from "lucide-react";
 import QRCode from "qrcode";
 
-export default function QRCodeShare() {
+interface QRCodeShareProps {
+  username: string;
+}
+
+export default function QRCodeShare({ username }: QRCodeShareProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -19,9 +23,8 @@ export default function QRCodeShare() {
   const generateQRCode = async () => {
     try {
       setIsGenerating(true);
-      const profileId = typeof window !== 'undefined' ? localStorage.getItem('profileId') : '';
       const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-      const shareUrl = profileId ? `${baseUrl}/profile/${profileId}` : baseUrl;
+      const shareUrl = `${baseUrl}/profile/${username}`;
       const qrCodeDataUrl = await QRCode.toDataURL(shareUrl, {
         width: 300,
         margin: 2,
@@ -44,9 +47,8 @@ export default function QRCodeShare() {
   };
 
   const handleShare = async () => {
-    const profileId = typeof window !== 'undefined' ? localStorage.getItem('profileId') : '';
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-    const shareUrl = profileId ? `${baseUrl}/profile/${profileId}` : baseUrl;
+    const shareUrl = `${baseUrl}/profile/${username}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -107,8 +109,8 @@ export default function QRCodeShare() {
                     Scan this QR code with your phone to access your SpeedDial
                   </p>
                   <p className="text-xs text-muted-foreground break-all">
-                    {typeof window !== 'undefined' && localStorage.getItem('profileId')
-                      ? `${window.location.origin}/profile/${localStorage.getItem('profileId')}`
+                    {typeof window !== 'undefined' 
+                      ? `${window.location.origin}/profile/${username}`
                       : ''}
                   </p>
                 </div>

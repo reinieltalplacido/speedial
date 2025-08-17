@@ -10,6 +10,7 @@ interface Link {
   title: string;
   url: string;
   category: string;
+  username: string;
 }
 
 interface LinkFormProps {
@@ -18,6 +19,7 @@ interface LinkFormProps {
   initialValues?: Link;
   isEditing?: boolean;
   isLoading?: boolean;
+  username: string; // Current username
 }
 
 export default function LinkForm({
@@ -26,6 +28,7 @@ export default function LinkForm({
   initialValues,
   isEditing = false,
   isLoading = false,
+  username,
 }: LinkFormProps) {
   const [formData, setFormData] = useState({
     title: initialValues?.title || "",
@@ -73,10 +76,15 @@ export default function LinkForm({
     e.preventDefault();
 
     if (validateForm()) {
+      const submitData = {
+        ...formData,
+        username, // Always use current username
+      };
+
       if (isEditing && initialValues?.id) {
-        onSubmit({ ...formData, id: initialValues.id });
+        onSubmit({ ...submitData, id: initialValues.id });
       } else {
-        onSubmit(formData);
+        onSubmit(submitData);
       }
       onCancel();
     }

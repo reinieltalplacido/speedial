@@ -4,6 +4,7 @@
     "title": "Instagram",
     "url": "https://www.instagram.com",
     "category": "INSTA",
+    "username": "demo",
     "createdAt": "2025-08-15T13:44:09.713Z"
   },
   {
@@ -11,7 +12,7 @@
     "title": "Facebook",
     "url": "https://www.facebook.com",
     "category": "General",
-    "profileId": "Oreo",
+    "username": "oreo",
     "createdAt": "2025-08-16T06:27:02.564Z"
   },
   {
@@ -19,7 +20,7 @@
     "title": "Tempo",
     "url": "https://www.tempo.new",
     "category": "General",
-    "profileId": "Oreo",
+    "username": "oreo",
     "createdAt": "2025-08-16T06:38:55.371Z"
   }
 ]

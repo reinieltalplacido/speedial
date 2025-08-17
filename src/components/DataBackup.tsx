@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Download, Upload, FileText } from "lucide-react";
-import { Link } from "@/app/page";
+import { Link } from "@/lib/types";
 
 interface DataBackupProps {
   links: Link[];

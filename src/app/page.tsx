@@ -1,33 +1,30 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import UsernameInput from '@/components/UsernameInput';
 
-export interface Link {
-  id: string;
-  title: string;
-  url: string;
-  category: string;
-}
-
-const SpeedDialApp = dynamic(() => import("@/components/SpeedDialAppSimple"), {
-  ssr: false,
-  loading: () => (
-    <div className="min-h-screen p-6 md:p-12 bg-background">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="bg-muted p-6 rounded-lg max-w-md">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground mx-auto mb-4"></div>
-            <h2 className="text-xl font-medium mb-2">Loading SpeedDial...</h2>
-            <p className="text-muted-foreground">
-              Please wait while we load your personal link dashboard.
-            </p>
-          </div>
+export default function HomePage() {
+  return (
+    <main className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <div className="w-full max-w-md text-center space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">SpeedDial</h1>
+          <p className="text-muted-foreground">
+            Share and discover your favorite links
+          </p>
+        </div>
+        
+        <UsernameInput 
+          onUsernameSubmit={(username) => {
+            // This will be handled by the component itself
+            window.location.href = `/profile/${username}`;
+          }}
+        />
+        
+        <div className="text-xs text-muted-foreground">
+          <p>Enter any username to view their shared links</p>
+          <p>You can add, edit, or delete links for any username</p>
         </div>
       </div>
-    </div>
-  ),
-});
-
-export default function Home() {
-  return <SpeedDialApp />;
+    </main>
+  );
 }

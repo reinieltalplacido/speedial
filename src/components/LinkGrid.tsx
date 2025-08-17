@@ -2,13 +2,7 @@
 
 import React from "react";
 import LinkCard from "@/components/LinkCard";
-
-interface Link {
-  id: string;
-  title: string;
-  url: string;
-  category: string;
-}
+import { Link } from "@/lib/types";
 
 interface LinkGridProps {
   links?: Link[];
@@ -28,18 +22,24 @@ const LinkGrid = ({
       title: "Google",
       url: "https://google.com",
       category: "Search",
+      username: "demo",
+      createdAt: new Date().toISOString(),
     },
     {
       id: "2",
       title: "GitHub",
       url: "https://github.com",
       category: "Development",
+      username: "demo",
+      createdAt: new Date().toISOString(),
     },
     {
       id: "3",
       title: "YouTube",
       url: "https://youtube.com",
       category: "Entertainment",
+      username: "demo",
+      createdAt: new Date().toISOString(),
     },
   ];
 

@@ -1,4 +1,4 @@
-import { Link } from '@/app/page';
+import { Link } from '@/lib/types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -10,11 +10,11 @@ export class ApiError extends Error {
 }
 
 export const linksApi = {
-  // Fetch all links for a profileId
-  async getLinks(profileId?: string): Promise<Link[]> {
+  // Fetch all links for a username
+  async getLinks(username?: string): Promise<Link[]> {
     try {
-      const url = profileId
-        ? `${API_BASE_URL}/api/links?profileId=${profileId}`
+      const url = username
+        ? `${API_BASE_URL}/api/links?username=${username}`
         : `${API_BASE_URL}/api/links`;
       const response = await fetch(url);
       if (!response.ok) {
@@ -27,8 +27,8 @@ export const linksApi = {
     }
   },
 
-  // Create a new link for a profileId
-  async createLink(link: Omit<Link, 'id'> & { profileId: string }): Promise<Link> {
+  // Create a new link for a username
+  async createLink(link: Omit<Link, 'id'> & { username: string }): Promise<Link> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/links`, {
         method: 'POST',
@@ -50,8 +50,8 @@ export const linksApi = {
     }
   },
 
-  // Update an existing link for a profileId
-  async updateLink(link: Link & { profileId: string }): Promise<Link> {
+  // Update an existing link for a username
+  async updateLink(link: Link & { username: string }): Promise<Link> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/links`, {
         method: 'PUT',
@@ -73,10 +73,10 @@ export const linksApi = {
     }
   },
 
-  // Delete a link for a profileId
-  async deleteLink(id: string, profileId: string): Promise<void> {
+  // Delete a link for a username
+  async deleteLink(id: string, username: string): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/links?id=${id}&profileId=${profileId}`, {
+      const response = await fetch(`${API_BASE_URL}/api/links?id=${id}&username=${username}`, {
         method: 'DELETE',
       });
       
