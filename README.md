@@ -1,8 +1,5 @@
 # SpeedDial - Personal Link Dashboard
 
-# YOLO Test 🚨
-Adding a line just for the YOLO badge
-
 
 A modern, responsive web application for managing and accessing your favorite links from any device. Built with Next.js, TypeScript, and Tailwind CSS.
 
@@ -223,3 +220,4 @@ If you encounter any issues:
 ---
 
 **Happy SpeedDialing! 🚀** 
+
